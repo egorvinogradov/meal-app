@@ -1,3 +1,9 @@
+// function View(proto){
+//     var f = function(){};
+//     f.prototype = proto;
+//     return f;
+// };
+
 var Config = {
     categories: [
         'Первые блюда',
@@ -15,7 +21,6 @@ var Config = {
         'Суббота'
     ]
 };
-
 
 function App(config){
     /** @constructor */
