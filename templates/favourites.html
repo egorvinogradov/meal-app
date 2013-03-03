@@ -1,0 +1,38 @@
+<template name="favourites">
+    <div class="content__favourites-message">
+        Перед вами все доступное меню. Выберете ваши любимые блюда и если вы по какой-либо причине
+        не сделаете заказ на новую неделю, блюда буду заказаны автоматически. Вы так же можете заказать
+        их вручную, нажав на кнопку ЗАКАЗАТЬ, после чего внести исправления в получившийся заказ.
+    </div>
+    
+    <div class="content__favourites-buttons">
+        <span class="content__favourites-save button">
+            <span class="button__wrapper">Сохранить</span>
+        </span>
+        <span class="content__favourites-order button">
+            <span class="button__wrapper">Заказать</span>
+        </span>
+    </div>
+
+    <div class="content__favourites-categories">
+        {{ categories }}
+        <div class="content__favourites-category-align-justify"></div>
+    </div>
+</template>
+
+<template name="favourites-category">
+    <div class="content__favourites-category" rel="{{ category }}">
+        <div class="content__favourites-category-blank"></div>
+        <h1 class="content__favourites-header">{{ name }}</h1>
+        <ul class="content__favourites-list">
+            {{ items }}
+        </ul>
+    </div>
+</template>
+
+<template name="favourites-item">
+    <li class="content__favourites-item {{#if isSelected }}m-selected{{/if}}" title="{{ provider }}" data-id="{{ id }}">
+        <span class="content__favourites-icon"></span>
+        {{ name }}
+    </li>
+</template>

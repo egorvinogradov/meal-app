@@ -1,0 +1,106 @@
+<!-- TODO: fix URLs -->
+
+<template name="header">
+
+    <div class="header__top">
+        <div class="header__top-wrapper">
+            <div class="header__logo">
+                <a class="header__logo-link" href="/"></a>
+            </div>
+            <div class="header__message"></div>
+            <ul class="header__nav">
+                <li class="header__nav-item">
+                    <span class="header__favourites">
+                        <i class="header__favourites-icon"></i>
+                        <span class="header__favourites-title header__nav-link">Любимые блюда</span>
+                        <span class="header__favourites-menu">
+                            <a class="header__favourites-edit header__nav-link" href="/#/favourites/">Редактировать</a>
+                            <span class="header__favourites-select button_small">Подайте их сейчас</span>
+                            <span class="header__favourites-help">
+                                <i class="header__favourites-help-icon">?</i>
+                                <div class="header__favourites-help-popup">
+                                    <i class="header__favourites-help-popup-corner"></i>
+                                    <p class="header__favourites-help-popup-p">
+                                        Вообще любимые блюда заказываются автоматически. То есть если вы
+                                        профакапили момент заказа на следующую неделю и сами ничего не
+                                        заказали, новый заказ будет сформирован из ваших любимых блюд.
+                                    </p>
+                                    <p class="header__favourites-help-popup-p">
+                                        Однако любимые блюда можно заказать и вручную, нажав на эту кнопку.
+                                        Блюда будут отмечены в новом заказе и рандомно распределены по
+                                        дням недели. После этого  можно будет внести изменения, что-то добавить,
+                                        что-то удалить и самому сформировать окончательный заказ.
+                                    </p>
+                                    <p class="header__favourites-help-popup-p">
+                                        АХТУНГ! Нажатие на эту кнопку сбрасывает все уже имеющиеся отметки
+                                        блюд в новом заказе. Поэтому нажимать на нее лучше сразу.
+                                    </p>
+                                </div>
+                            </span>
+                        </span>
+                    </span>
+                </li>
+                <li class="header__nav-item header__exit">
+                    <a class="header__nav-link" href="/accounts/base/logout/">Выход есть</a>
+                </li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="header__bottom">
+        <div class="header__bottom-wrapper">
+            <ul class="header__week">
+                {{> headerDays }}
+            </ul>
+            <div class="header__complete">
+                <span class="header__complete-fork"></span>
+                <a class="header__complete-button button" href="/#/order/">
+                    <span class="header__complete-button-wrapper button__wrapper">ням-ням</span>
+                </a>
+                <span class="header__complete-spoon"></span>
+            </div>
+            <div class="header__providers">
+                <ul class="header__providers-list"></ul>
+            </div>
+            <div class="header__change">
+                <span class="header__change-l"></span>
+                <a class="header__change-c" href="/#/">Исправить</a>
+                <span class="header__change-r"></span>
+            </div>
+        </div>
+    </div>
+
+</template>
+
+
+<template name="headerDays">
+    {{#each days }}
+        <li class="header__day {{#if inactive }}m-inactive{{/if}} {{#if completed }}m-completed{{/if}} {{#if hasPrice }}m-has-price{{/if}}" data-weekday="{{ weekday }}" data-date="{{ date }}">
+            <span class="header__day-title">{{ weekday }}</span>
+            <span class="header__day-comment"></span>
+            <div class="header__day-variants">
+                <div class="header__day-variants-wrapper">
+                    <div class="header__day-select">
+                        <span class="header__day-select-item header__day-restaurant {{#if isRestaurant }}m-active{{/if}}" data-value="restaurant">иду в ресторан</span>
+                        <span class="header__day-select-item header__day-office {{#if isOffice }}m-active{{/if}}" data-value="office">ем в офисе</span>
+                        <span class="header__day-select-item header__day-none {{#if isNone }}m-active{{/if}}" data-value="none">худею</span>
+                    </div>
+                    <div class="header__day-price">
+                        <span class="header__day-price-big">{{ price }}</span>р.
+                    </div>
+                </div>
+            </div>
+        </li>
+    {{/each}}}
+</template>
+
+
+<template name="headerProviders">
+    {{#each providers }}
+        <li class="header__provider" data-name="{{ name }}">
+            <span class="header__provider-l"></span>
+            <span class="header__provider-c">{{ name }}</span>
+            <span class="header__provider-r"></span>
+        </li>
+    {{/each}}}
+</template>

@@ -1,0 +1,27 @@
+<template name="overlay">
+    <div class="content__overlay {{ className }}">
+        <div class="content__overlay-header">
+            <div class="content__overlay-header-wrapper">
+                {{ message }}
+            </div>
+            <a class="content__overlay-header-link" href="{{ link.href }}" target="_blank">{{ link.text }}</a>
+        </div>
+    </div>
+</template>
+
+<template name="overlay-attention">
+    <div class="content__overlay m-overlay-attention">
+        <div class="content__overlay-header">
+            <div class="content__overlay-attention-wrapper">
+                <div class="content__overlay-attention-header">
+                    Ахтунг!
+                </div>
+                <div class="content__overlay-attention-comment">Нажатие на эту кнопку сбрасит все уже имеющиеся отметки блюд в новом заказе.</div>
+                <div class="content__overlay-attention-buttons">
+                    <span class="content__overlay-attention-ok button_small">Хорошо</span>
+                    <span class="content__overlay-attention-cancel button_small">Не хорошо</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</template>

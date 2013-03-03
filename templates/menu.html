@@ -1,0 +1,31 @@
+
+<!-- TODO: find out how to write handlebar conditions -->
+
+<template name="menu">
+    {{#each categories }}
+        <div class="content__menu-group">
+            <h1 class="content__menu-header" data-order="{{ order }}">{{ name }}</h1>
+            <ul class="content__menu-list">
+                {{#each items }}
+                    {{> menu-item }}
+                {{/each}}
+            </ul>
+        </div>
+    {{/each}}
+</template>
+
+<template name="menu-item">
+    <li class="content__menu-item {{#if selected }}m-selected{{/if}}" data-id="{{ id }}" title="{{ provider }}{{#if category }}: {{ category }}{{/if}}">
+        <div class="content__menu-item-wrapper">
+            <div class="content__menu-name">{{ name }}</div>
+            <span class="content__menu-count {{#if count }}m-one{{/if}}">
+                <button class="content__menu-plus">+</button>
+                <span class="content__menu-number">{{#if count }}{{ count }}{{ else }}0{{/if}}</span>
+                <button class="content__menu-minus">&minus;</button>
+            </span>
+            <span class="content__menu-price">
+                <span class="content__menu-price-big">{{ price }}</span>р. <!-- TODO: format price -->
+            </span>
+        </div>
+    </li>
+</template>

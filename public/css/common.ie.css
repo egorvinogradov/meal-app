@@ -1,0 +1,22 @@
+.content__overlay {
+    background: #fff;
+}
+
+.content__menu-item.m-inactive {
+   -ms-filter:'progid:DXImageTransform.Microsoft.Alpha(opacity=30)';
+}
+
+.content__overlay {
+    background: #fff;
+}
+
+.content__overlay-header-link {
+    border-bottom: 1px solid #497c94;
+}
+
+.content__overlay-header-link:hover {
+    border-bottom-color: #497c94;
+}
+
+/* TODO: check layout in ie */
+/* TODO: glasses.jpg background-size: contain */
