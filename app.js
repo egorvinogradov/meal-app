@@ -18,8 +18,15 @@ var Config = {
         'Среда',
         'Четверг',
         'Пятница',
-        'Суббота'
-    ]
+        'Суббота',
+        'Воскресенье'
+    ],
+    overlay: {
+        weightLoss: {
+            className: '',
+            message: ''
+        }
+    }
 };
 
 function App(config){
@@ -279,6 +286,12 @@ Header.prototype = {
             this.app.menu.render(this.menu.assembled, currentDate, currentProvider);
         }
         else if ( type === 'restaurant' ) {
+
+            var overlay = new Overlay({
+                className: '',
+                message: ''
+            });
+
             console.log('>>> render overlay restaurant'); // TODO: render overlay
         }
         else if ( type === 'none' ) {
@@ -386,6 +399,30 @@ Menu.prototype = {
         })
     }
 };
+
+
+
+
+function Overlay(options){
+    /** @constructor */
+    this.container = $(options.container);
+    this.app = options.app;
+    this.menu = options.menu;
+}
+
+Overlay.prototype = {
+
+    initialize: function(){
+
+        console.log('Overlay initialize', this.menu.assembled);
+
+    },
+    render: function(){
+
+    }
+};
+
+
 
 
 if ( Meteor.isClient ) {
