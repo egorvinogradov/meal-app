@@ -1,8 +1,25 @@
-// function View(proto){
-//     var f = function(){};
-//     f.prototype = proto;
-//     return f;
-// };
+function View(){
+    /** @constructor */
+};
+
+View.extend = function(methods){
+    
+    var BaseView = function(options){
+        if ( options ) {
+            this.options = options;
+        }
+        this.initialize && this.initialize();
+    };
+    for ( var key in this.prototype ) {
+        BaseView.prototype[key] = this.prototype[key];
+    }
+    for ( var method in methods ) {
+        BaseView.prototype[method] = methods[method];
+    }
+    BaseView.extend = this.extend;
+    return BaseView;
+};
+
 
 var Config = {
     categories: [
@@ -60,12 +77,7 @@ var Config = {
 };
 
 
-function App(config){
-    /** @constructor */
-    this.config = config;
-};
-
-App.prototype = {
+var App = View.extend({
 
     selectors: {
         overlay: '.content__overlay'
@@ -74,31 +86,26 @@ App.prototype = {
     initialize: function(){
 
         console.log('App initialize');
+        this.config = this.options.config;
 
         var order = this.getOrder();
-        var menu = this.getMenu();
-        var assembledMenu = this.assembleMenu(menu);
+        var rawMenu = this.getMenu();
+        var assembledMenu = this.assembleMenu(rawMenu);
 
         this.header = new Header({
+            app: this,
             container: '.header',
-            menu: {
-                raw: menu,
-                assembled: assembledMenu
-            },
-            order: order,
-            app: this
+            assembledMenu: assembledMenu,
+            rawMenu: rawMenu,
+            order: order
         });
-        this.header.initialize();
 
         this.menu = new Menu({
+            app: this,
             container: '.content__wrapper',
-            menu: {
-                raw: menu,
-                assembled: assembledMenu
-            },
-            app: this
+            assembledMenu: assembledMenu,
+            rawMenu: rawMenu
         });
-        this.menu.initialize();
 
     },
     getMenu: function(){
@@ -179,24 +186,12 @@ App.prototype = {
     removeOverlays: function(){
         $(this.selectors.overlay).remove();
     }
-};
+
+});
 
 
 
-///////////////////////
-
-
-
-function Header(options){
-    /** @constructor */
-    this.container = $(options.container);
-    this.app = options.app;
-    this.menu = options.menu;
-    this.order = options.order;
-};
-
-
-Header.prototype = {
+var Header = View.extend({
 
     selectors: {
         headerDay: '.header__day',
@@ -210,8 +205,15 @@ Header.prototype = {
     },
     initialize: function(){
 
-        console.log('Header initialize', this.menu.raw);
-        this.render(this.menu.raw, this.order);
+        this.container = $(this.options.container);
+        this.app = this.options.app;
+        this.order = this.options.order;
+        this.rawMenu = this.options.rawMenu;
+        this.assembledMenu = this.options.assembledMenu;
+
+        console.log('Header initialize', this.rawMenu);
+
+        this.render(this.rawMenu, this.order);
         this.bindBodyEvents();
     },
     getCurrentWeekDays: function(menu){
@@ -296,7 +298,7 @@ Header.prototype = {
             .removeClass(this.classes.active);
 
         this.app.menu.render(
-            this.app.menu.menu.assembled,
+            this.app.menu.assembledMenu,
             currentDate,
             currentProvider
         );
@@ -306,7 +308,7 @@ Header.prototype = {
         $(e.currentTarget).addClass(this.classes.opened);
     },
     onSelectItemClick: function(e){
-        
+
         this.app.removeOverlays();
         this.hideSelects();
 
@@ -325,8 +327,8 @@ Header.prototype = {
             var currentDate = currentTarget.parents(this.selectors.headerDay).data('date');
             var currentProvider = this.app.menu.container.data('provider');
 
-            this.updateProviders(this.menu.raw, currentDate, currentProvider);
-            this.app.menu.render(this.menu.assembled, currentDate, currentProvider);
+            this.updateProviders(this.rawMenu, currentDate, currentProvider);
+            this.app.menu.render(this.assembledMenu, currentDate, currentProvider);
         }
         else if ( type === 'restaurant' ) {
             var overlay = new Overlay({
@@ -335,7 +337,6 @@ Header.prototype = {
                 weekday: weekday,
                 app: this.app
             });
-            overlay.initialize();
         }
         else if ( type === 'weightLoss' ) {
             var overlay = new Overlay({
@@ -344,7 +345,6 @@ Header.prototype = {
                 weekday: weekday,
                 app: this.app
             });
-            overlay.initialize();
         }
 
         e.stopPropagation();
@@ -394,35 +394,32 @@ Header.prototype = {
                 this.hideSelects();
             }
         }, this)).on('keyup', $.proxy(function(e){
-            if ( e.which === 27 ) {
+            if ( e.which === 27 /* ESC */ ) {
                 this.hideSelects();
             }
         }, this));
-    },
-};
+    }
 
-
-//////////////////////////
+});
 
 
 
-function Menu(options){
-    /** @constructor */
-    this.container = $(options.container);
-    this.app = options.app;
-    this.menu = options.menu;
-}
-
-Menu.prototype = {
+var Menu = View.extend({
 
     initialize: function(){
 
-        console.log('Menu initialize', this.menu.assembled);
+        this.container = $(this.options.container);
+        this.rawMenu = this.options.rawMenu;
+        this.assembledMenu = this.options.assembledMenu;
+        this.app = this.options.app;
 
-        var firstDay = _.keys(this.menu.assembled)[0];
-        var firstProvider = _.keys(this.menu.assembled[firstDay])[0];
-        this.render(this.menu.assembled, firstDay, firstProvider);
-        this.app.header.updateProviders(this.menu.raw, firstDay, firstProvider);
+        console.log('Menu initialize', this.assembledMenu);
+
+        var firstDay = _.keys(this.assembledMenu)[0];
+        var firstProvider = _.keys(this.assembledMenu[firstDay])[0];
+
+        this.render(this.assembledMenu, firstDay, firstProvider);
+        this.app.header.updateProviders(this.rawMenu, firstDay, firstProvider);
 
     },
     render: function(menu, date, provider){
@@ -446,45 +443,61 @@ Menu.prototype = {
             provider: provider
         });
     }
-};
+});
 
 
 
-
-function Overlay(options){
-    /** @constructor */
-    this.container = $(options.container);
-    this.app = options.app;
-    this.type = options.type;
-    this.weekday = options.weekday;
-}
-
-Overlay.prototype = {
+var Overlay = View.extend({
 
     initialize: function(){
+
+        this.container = $(this.options.container);
+        this.app = this.options.app;
+        this.type = this.options.type;
+        this.weekday = this.options.weekday;
 
         var config = this.app.config.overlay;
         var templateVars = {
             link: config.links[this.type],
             className: config.classes[this.type][ this.weekday ? 'day' : 'week' ],
-            message: config.messageBeginnings[this.type]
-                + ( this.weekday ? config.messageEndingsWeekdays[this.weekday.toLowerCase()] : config.messageEndingsWeek )
+            message: config.messageBeginnings[this.type] + (
+                this.weekday
+                    ? config.messageEndingsWeekdays[this.weekday.toLowerCase()]
+                    : config.messageEndingsWeek
+            )
         }
 
         console.log('Overlay initialize', this.type, templateVars);
         this.render(templateVars);
     },
 
-    render: function(config){
+    render: function(data){
         var fragment = Meteor.render($.proxy(function(){
-            return Template.overlay(config);
+            return Template.overlay(data);
         }, this));
         console.log('Overlay render', fragment, this.container);
-        //this.app.removeOverlays();
         this.container.append(fragment);
     }
-};
+});
 
+
+var Favourites = View.extend({
+
+    initialize: function(){
+
+        this.container = $(this.options.container);
+        this.rawMenu = this.options.rawMenu;
+        this.assembledMenu = this.options.assembledMenu;
+        this.app = this.options.app;
+
+        console.log('Favourites initialize');
+
+    },
+
+    render: function(){
+
+    }
+});
 
 
 
@@ -496,8 +509,7 @@ if ( Meteor.isClient ) {
             setTimeout(init, 100);
         }
         else {
-            window.app = new App(Config);
-            window.app.initialize();
+            window.app = new App({ config: Config });
         }
     };
 
