@@ -573,7 +573,7 @@ body {
 .header__day.m-has-price .header__day-select {
     text-align: left;
     display: table-cell;
-    padding-right: 7px;
+    padding-right: 5px;
     border-right: 1px solid #D9DADC;
 }
 

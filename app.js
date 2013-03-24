@@ -22,12 +22,43 @@ var Config = {
         'Воскресенье'
     ],
     overlay: {
-        weightLoss: {
-            className: '',
-            message: ''
+        messageEndingsWeek: 'всю неделю',
+        messageEndingsWeekdays: {
+            'понедельник':  'по понедельникам',
+            'вторник':      'по вторникам',
+            'среда':        'по средам',
+            'четверг':      'по четвергам',
+            'пятница':      'по пятницам',
+            'суббота':      'по субботам',
+            'воскресенье':  'по воскресеньям'
+        },
+        messageBeginnings: {
+            restaurant: 'Ресторан ',
+            weightLoss: 'Худею '
+        },
+        classes: {
+            restaurant: {
+                day: 'm-overlay-day-restaurant',
+                week: 'm-overlay-week-restaurant'
+            },
+            weightLoss: {
+                day: 'm-overlay-day-slimming',
+                week: 'm-overlay-week-slimming'
+            }
+        },
+        links: {
+            restaurant: {
+                text: 'Где это клёвое место?',
+                href: 'http://maps.google.com' // TODO: указать точное место
+            },
+            weightLoss: {
+                text: 'Худейте правильно',
+                href: 'http://ru.wikipedia.org' // TODO: какая-нибудь статья о диете
+            }
         }
     }
 };
+
 
 function App(config){
     /** @constructor */
@@ -35,6 +66,10 @@ function App(config){
 };
 
 App.prototype = {
+
+    selectors: {
+        overlay: '.content__overlay'
+    },
 
     initialize: function(){
 
@@ -140,6 +175,9 @@ App.prototype = {
 
         return assembledMenu;
 
+    },
+    removeOverlays: function(){
+        $(this.selectors.overlay).remove();
     }
 };
 
@@ -268,8 +306,13 @@ Header.prototype = {
         $(e.currentTarget).addClass(this.classes.opened);
     },
     onSelectItemClick: function(e){
+        
+        this.app.removeOverlays();
+        this.hideSelects();
 
         var currentTarget = $(e.currentTarget);
+        var currentDay = currentTarget.parents(this.selectors.headerDay).first();
+        var weekday = currentDay.data('weekday');
         var type = currentTarget.data('value');
 
         currentTarget
@@ -286,19 +329,24 @@ Header.prototype = {
             this.app.menu.render(this.menu.assembled, currentDate, currentProvider);
         }
         else if ( type === 'restaurant' ) {
-
             var overlay = new Overlay({
-                className: '',
-                message: ''
+                container: '.content',
+                type: 'restaurant',
+                weekday: weekday,
+                app: this.app
             });
-
-            console.log('>>> render overlay restaurant'); // TODO: render overlay
+            overlay.initialize();
         }
-        else if ( type === 'none' ) {
-            console.log('>>> render overlay none');  // TODO: render overlay
+        else if ( type === 'weightLoss' ) {
+            var overlay = new Overlay({
+                container: '.content',
+                type: 'weightLoss',
+                weekday: weekday,
+                app: this.app
+            });
+            overlay.initialize();
         }
 
-        this.hideSelects();
         e.stopPropagation();
     },
     updateProviders: function(menu, date, selectedProvider){
@@ -396,7 +444,7 @@ Menu.prototype = {
         this.container.html(fragment).data({
             date: date,
             provider: provider
-        })
+        });
     }
 };
 
@@ -407,18 +455,33 @@ function Overlay(options){
     /** @constructor */
     this.container = $(options.container);
     this.app = options.app;
-    this.menu = options.menu;
+    this.type = options.type;
+    this.weekday = options.weekday;
 }
 
 Overlay.prototype = {
 
     initialize: function(){
 
-        console.log('Overlay initialize', this.menu.assembled);
+        var config = this.app.config.overlay;
+        var templateVars = {
+            link: config.links[this.type],
+            className: config.classes[this.type][ this.weekday ? 'day' : 'week' ],
+            message: config.messageBeginnings[this.type]
+                + ( this.weekday ? config.messageEndingsWeekdays[this.weekday.toLowerCase()] : config.messageEndingsWeek )
+        }
 
+        console.log('Overlay initialize', this.type, templateVars);
+        this.render(templateVars);
     },
-    render: function(){
 
+    render: function(config){
+        var fragment = Meteor.render($.proxy(function(){
+            return Template.overlay(config);
+        }, this));
+        console.log('Overlay render', fragment, this.container);
+        //this.app.removeOverlays();
+        this.container.append(fragment);
     }
 };
 
