@@ -14,7 +14,7 @@
                         <i class="header__favourites-icon"></i>
                         <span class="header__favourites-title header__nav-link">Любимые блюда</span>
                         <span class="header__favourites-menu">
-                            <a class="header__favourites-edit header__nav-link" href="/#/favourites/">Редактировать</a>
+                            <a class="header__favourites-edit header__nav-link" href="/favourites/">Редактировать</a>
                             <span class="header__favourites-select button_small">Подайте их сейчас</span>
                             <span class="header__favourites-help">
                                 <i class="header__favourites-help-icon">?</i>
@@ -50,11 +50,32 @@
     <div class="header__bottom">
         <div class="header__bottom-wrapper">
             <ul class="header__week">
-                {{> headerDays }}
+
+                {{#each days }}
+
+                    <li class="header__day {{#if inactive }}m-inactive{{/if}} {{#if completed }}m-completed{{/if}} {{#if hasPrice }}m-has-price{{/if}}" data-weekday="{{ weekday }}" data-date="{{ date }}">
+                        <span class="header__day-title">{{ weekday }}</span>
+                        <span class="header__day-comment"></span>
+                        <div class="header__day-variants">
+                            <div class="header__day-variants-wrapper">
+                                <div class="header__day-select">
+                                    <span class="header__day-select-item header__day-restaurant {{#if isRestaurant }}m-active{{/if}}" data-value="restaurant">иду в ресторан</span>
+                                    <span class="header__day-select-item header__day-office {{#if isOffice }}m-active{{/if}}" data-value="office">ем в офисе</span>
+                                    <span class="header__day-select-item header__day-none {{#if isNone }}m-active{{/if}}" data-value="weightLoss">худею</span>
+                                </div>
+                                <div class="header__day-price">
+                                    <span class="header__day-price-big">{{ price }}</span>р.
+                                </div>
+                            </div>
+                        </div>
+                    </li>
+
+                {{/each}}
+
             </ul>
             <div class="header__complete">
                 <span class="header__complete-fork"></span>
-                <a class="header__complete-button button" href="/#/order/">
+                <a class="header__complete-button button" href="/order/">
                     <span class="header__complete-button-wrapper button__wrapper">ням-ням</span>
                 </a>
                 <span class="header__complete-spoon"></span>
@@ -64,34 +85,12 @@
             </div>
             <div class="header__change">
                 <span class="header__change-l"></span>
-                <a class="header__change-c" href="/#/">Исправить</a>
+                <a class="header__change-c" href="/">Исправить</a>
                 <span class="header__change-r"></span>
             </div>
         </div>
     </div>
 
-</template>
-
-
-<template name="headerDays">
-    {{#each days }}
-        <li class="header__day {{#if inactive }}m-inactive{{/if}} {{#if completed }}m-completed{{/if}} {{#if hasPrice }}m-has-price{{/if}}" data-weekday="{{ weekday }}" data-date="{{ date }}">
-            <span class="header__day-title">{{ weekday }}</span>
-            <span class="header__day-comment"></span>
-            <div class="header__day-variants">
-                <div class="header__day-variants-wrapper">
-                    <div class="header__day-select">
-                        <span class="header__day-select-item header__day-restaurant {{#if isRestaurant }}m-active{{/if}}" data-value="restaurant">иду в ресторан</span>
-                        <span class="header__day-select-item header__day-office {{#if isOffice }}m-active{{/if}}" data-value="office">ем в офисе</span>
-                        <span class="header__day-select-item header__day-none {{#if isNone }}m-active{{/if}}" data-value="weightLoss">худею</span>
-                    </div>
-                    <div class="header__day-price">
-                        <span class="header__day-price-big">{{ price }}</span>р.
-                    </div>
-                </div>
-            </div>
-        </li>
-    {{/each}}}
 </template>
 
 
@@ -102,5 +101,5 @@
             <span class="header__provider-c">{{ name }}</span>
             <span class="header__provider-r"></span>
         </li>
-    {{/each}}}
+    {{/each}}
 </template>

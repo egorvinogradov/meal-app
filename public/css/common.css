@@ -424,6 +424,10 @@ body {
     display: none;
 }
 
+.m-favourites .content__wrapper {
+    padding-top: 45px;
+}
+
 .header__bottom {
     background: #F0F9FD;
     border-bottom: 2px solid #FFC800;
@@ -839,6 +843,7 @@ body {
     width: 70%;
     padding: 178px 0 30px;
     margin: 0 auto;
+    position: relative;
 }
 
 .content__menu-header {

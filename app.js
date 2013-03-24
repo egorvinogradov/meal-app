@@ -100,12 +100,34 @@ var App = View.extend({
             order: order
         });
 
-        this.menu = new Menu({
-            app: this,
-            container: '.content__wrapper',
-            assembledMenu: assembledMenu,
-            rawMenu: rawMenu
-        });
+        if ( !/favourites|order/i.test(location.href) ) { // TODO: remove
+
+            this.menu = new Menu({
+                app: this,
+                container: '.content__wrapper',
+                assembledMenu: assembledMenu,
+                rawMenu: rawMenu
+            });
+        }
+        else {
+
+            if ( /favourites/i.test(location.href) ) { // TODO: use router
+                this.favourites = new Favourites({
+                    app: this,
+                    container: '.content__wrapper',
+                    assembledMenu: assembledMenu,
+                    rawMenu: rawMenu
+                });
+            }
+            if ( /order/i.test(location.href) ) { // TODO: use router
+                this.order = new Order({
+                    container: '.content__wrapper',
+                    order: order,
+                    app: this
+                });
+            }
+
+        }
 
     },
     getMenu: function(){
@@ -491,13 +513,78 @@ var Favourites = View.extend({
         this.app = this.options.app;
 
         console.log('Favourites initialize');
+        this.render( this.assembleFavourites(this.assembledMenu) );
+
+    },
+    assembleFavourites: function(assembledMenu){
+
+        var categories = {};
+
+        _.each(assembledMenu, function(day){
+            _.each(day, function(provider){
+                _.each(provider, function(dishes, categoryName){
+                    if ( !categories[categoryName] ) {
+                        categories[categoryName] = [];
+                    }
+                    categories[categoryName] = categories[categoryName].concat(dishes);
+                });
+            });
+        });
+
+        console.log('Favourites assembleFavourites', categories);
+        return categories;
+    },
+
+    render: function(data){
+
+        var fragment = Meteor.render($.proxy(function(){
+            return Template.favourites({
+                categories: _.map(data, function(value, key){
+                    return {
+                        name: key,
+                        items: value
+                    };
+                }, this).sort($.proxy(function(a,b){
+                    var categories = this.app.config.categories;
+                    return categories.indexOf(a.name) < categories.indexOf(b.name) ? -1 : 1;
+                }, this))
+            });
+        }, this));
+        console.log('Favourites render', fragment, this.container);
+        this.container.append(fragment);
+        $('body').addClass('m-favourites');
+
+    }
+});
+
+
+
+var Order = View.extend({
+
+    initialize: function(){
+
+        this.container = $(this.options.container);
+        this.order = this.options.order;
+        this.app = this.options.app;
+
+        console.log('Order initialize');
 
     },
 
     render: function(){
 
+        var fragment = Meteor.render($.proxy(function(){
+            return Template.order(data);
+        }, this));
+        console.log('Order render', fragment, this.container);
+        this.container.append(fragment);
+        $('body').addClass('m-order');
+
     }
 });
+
+
+
 
 
 

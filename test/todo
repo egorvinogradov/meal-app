@@ -1,6 +1,16 @@
-Выбор на всю неделю
+--- Базовая view и наследование
 Order
 Favourites
+	heart click events
+	media queries IE
+	side columns
+	remove duplicates
+	find dish by name
+Overlay
+	start
+	attention
 Роутер
-
+Menu
+	Выбор на всю неделю
+	Помечать заказанные блюда
 

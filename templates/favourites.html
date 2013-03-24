@@ -15,24 +15,20 @@
     </div>
 
     <div class="content__favourites-categories">
-        {{ categories }}
+        {{#each categories }}
+            <div class="content__favourites-category" rel="{{ category }}">
+                <div class="content__favourites-category-blank"></div>
+                <h1 class="content__favourites-header">{{ name }}</h1>
+                <ul class="content__favourites-list">
+                    {{#each items }}
+                        <li class="content__favourites-item {{#if isSelected }}m-selected{{/if}}" title="{{ provider }}" data-id="{{ id }}">
+                            <span class="content__favourites-icon"></span>
+                            {{ name }}
+                        </li>
+                    {{/each}}
+                </ul>
+            </div>
+        {{/each}}
         <div class="content__favourites-category-align-justify"></div>
     </div>
-</template>
-
-<template name="favourites-category">
-    <div class="content__favourites-category" rel="{{ category }}">
-        <div class="content__favourites-category-blank"></div>
-        <h1 class="content__favourites-header">{{ name }}</h1>
-        <ul class="content__favourites-list">
-            {{ items }}
-        </ul>
-    </div>
-</template>
-
-<template name="favourites-item">
-    <li class="content__favourites-item {{#if isSelected }}m-selected{{/if}}" title="{{ provider }}" data-id="{{ id }}">
-        <span class="content__favourites-icon"></span>
-        {{ name }}
-    </li>
 </template>
