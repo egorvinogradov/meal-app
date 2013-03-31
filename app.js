@@ -38,29 +38,35 @@ var Config = {
         'Суббота',
         'Воскресенье'
     ],
+    messageEndingsWeek: 'всю неделю',
+    messageEndingsWeekdays: {
+        'понедельник':  'по понедельникам',
+        'вторник':      'по вторникам',
+        'среда':        'по средам',
+        'четверг':      'по четвергам',
+        'пятница':      'по пятницам',
+        'суббота':      'по субботам',
+        'воскресенье':  'по воскресеньям'
+    },
+    messageBeginnings: {
+        restaurant: 'Ресторан ',
+        weightLoss: 'Худею '
+    },
+    order: {
+        classes: {
+            restaurant: 'content__order-restaurant',
+            weightLoss: 'content__order-weightloss'
+        }
+    },
     overlay: {
-        messageEndingsWeek: 'всю неделю',
-        messageEndingsWeekdays: {
-            'понедельник':  'по понедельникам',
-            'вторник':      'по вторникам',
-            'среда':        'по средам',
-            'четверг':      'по четвергам',
-            'пятница':      'по пятницам',
-            'суббота':      'по субботам',
-            'воскресенье':  'по воскресеньям'
-        },
-        messageBeginnings: {
-            restaurant: 'Ресторан ',
-            weightLoss: 'Худею '
-        },
         classes: {
             restaurant: {
                 day: 'm-overlay-day-restaurant',
                 week: 'm-overlay-week-restaurant'
             },
             weightLoss: {
-                day: 'm-overlay-day-slimming',
-                week: 'm-overlay-week-slimming'
+                day: 'm-overlay-day-weightloss',
+                week: 'm-overlay-week-weightloss'
             }
         },
         links: {
@@ -100,33 +106,20 @@ var App = View.extend({
             order: order
         });
 
-        if ( !/favourites|order/i.test(location.href) ) { // TODO: remove
-
+        if ( /order/i.test(location.href) ) { // TODO: use router
+            this.order = new Order({
+                container: '.content__wrapper',
+                order: order,
+                app: this
+            });
+        }
+        else {
             this.menu = new Menu({
                 app: this,
                 container: '.content__wrapper',
                 assembledMenu: assembledMenu,
                 rawMenu: rawMenu
             });
-        }
-        else {
-
-            if ( /favourites/i.test(location.href) ) { // TODO: use router
-                this.favourites = new Favourites({
-                    app: this,
-                    container: '.content__wrapper',
-                    assembledMenu: assembledMenu,
-                    rawMenu: rawMenu
-                });
-            }
-            if ( /order/i.test(location.href) ) { // TODO: use router
-                this.order = new Order({
-                    container: '.content__wrapper',
-                    order: order,
-                    app: this
-                });
-            }
-
         }
 
     },
@@ -478,10 +471,10 @@ var Overlay = View.extend({
         this.type = this.options.type;
         this.weekday = this.options.weekday;
 
-        var config = this.app.config.overlay;
+        var config = this.app.config;
         var templateVars = {
-            link: config.links[this.type],
-            className: config.classes[this.type][ this.weekday ? 'day' : 'week' ],
+            link: config.overlay.links[this.type],
+            className: config.overlay.classes[this.type][ this.weekday ? 'day' : 'week' ],
             message: config.messageBeginnings[this.type] + (
                 this.weekday
                     ? config.messageEndingsWeekdays[this.weekday.toLowerCase()]
@@ -503,62 +496,6 @@ var Overlay = View.extend({
 });
 
 
-var Favourites = View.extend({
-
-    initialize: function(){
-
-        this.container = $(this.options.container);
-        this.rawMenu = this.options.rawMenu;
-        this.assembledMenu = this.options.assembledMenu;
-        this.app = this.options.app;
-
-        console.log('Favourites initialize');
-        this.render( this.assembleFavourites(this.assembledMenu) );
-
-    },
-    assembleFavourites: function(assembledMenu){
-
-        var categories = {};
-
-        _.each(assembledMenu, function(day){
-            _.each(day, function(provider){
-                _.each(provider, function(dishes, categoryName){
-                    if ( !categories[categoryName] ) {
-                        categories[categoryName] = [];
-                    }
-                    categories[categoryName] = categories[categoryName].concat(dishes);
-                });
-            });
-        });
-
-        console.log('Favourites assembleFavourites', categories);
-        return categories;
-    },
-
-    render: function(data){
-
-        var fragment = Meteor.render($.proxy(function(){
-            return Template.favourites({
-                categories: _.map(data, function(value, key){
-                    return {
-                        name: key,
-                        items: value
-                    };
-                }, this).sort($.proxy(function(a,b){
-                    var categories = this.app.config.categories;
-                    return categories.indexOf(a.name) < categories.indexOf(b.name) ? -1 : 1;
-                }, this))
-            });
-        }, this));
-        console.log('Favourites render', fragment, this.container);
-        this.container.append(fragment);
-        $('body').addClass('m-favourites');
-
-    }
-});
-
-
-
 var Order = View.extend({
 
     initialize: function(){
@@ -569,12 +506,46 @@ var Order = View.extend({
 
         console.log('Order initialize');
 
+        this.render(this.order);
+
     },
 
-    render: function(){
+    render: function(data){
 
+        var config = this.app.config;
         var fragment = Meteor.render($.proxy(function(){
-            return Template.order(data);
+            return Template.order({
+                days: _.map(data.order, function(dayOrder){
+
+                    var day = this.app.getDayByDate(dayOrder.date);
+
+                    if ( dayOrder.dishes && dayOrder.dishes.length ) {
+                        return {
+                            date: dayOrder.date,
+                            dishes: dayOrder.dishes,
+                            day: day,
+                            price: 300
+                        }
+                    }
+                    else if ( dayOrder.restaurant ) {
+                        return {
+                            date: dayOrder.date,
+                            day: day,
+                            message: config.messageBeginnings.restaurant + config.messageEndingsWeekdays[day.toLowerCase()],
+                            className: config.order.classes.restaurant
+                        }
+                    }
+                    else {
+                        return {
+                            date: dayOrder.date,
+                            day: day,
+                            message: config.messageBeginnings.weightLoss + config.messageEndingsWeekdays[day.toLowerCase()],
+                            className: config.order.classes.weightLoss
+                        }
+                    }
+
+                }, this)
+            });
         }, this));
         console.log('Order render', fragment, this.container);
         this.container.append(fragment);

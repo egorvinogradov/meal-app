@@ -7,14 +7,14 @@
             <h1 class="content__menu-header" data-order="{{ order }}">{{ name }}</h1>
             <ul class="content__menu-list">
                 {{#each items }}
-                    {{> menu-item }}
+                    {{> menuItem }}
                 {{/each}}
             </ul>
         </div>
     {{/each}}
 </template>
 
-<template name="menu-item">
+<template name="menuItem">
     <li class="content__menu-item {{#if selected }}m-selected{{/if}}" data-id="{{ id }}" title="{{ provider }}{{#if category }}: {{ category }}{{/if}}">
         <div class="content__menu-item-wrapper">
             <div class="content__menu-name">{{ name }}</div>

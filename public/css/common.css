@@ -1099,18 +1099,18 @@ body {
     background: #FFD641;
 }
 
-.content__overlay.m-overlay-week-slimming {
-    background: #fff url('/img/slimming.jpg') no-repeat 50% 50%;
+.content__overlay.m-overlay-week-weightloss {
+    background: #fff url('/img/weightloss.jpg') no-repeat 50% 50%;
     -webkit-background-size: contain;
        -moz-background-size: contain;
          -o-background-size: contain;
             background-size: contain;
 }
 
-.content__overlay.m-overlay-day-slimming .content__overlay-header,
-.content__overlay.m-overlay-week-slimming .content__overlay-header,
-.content__overlay.m-overlay-day-slimming .content__overlay-header-wrapper,
-.content__overlay.m-overlay-week-slimming .content__overlay-header-wrapper {
+.content__overlay.m-overlay-day-weightloss .content__overlay-header,
+.content__overlay.m-overlay-week-weightloss .content__overlay-header,
+.content__overlay.m-overlay-day-weightloss .content__overlay-header-wrapper,
+.content__overlay.m-overlay-week-weightloss .content__overlay-header-wrapper {
     background: #B1E7F8;
 }
 
@@ -1187,7 +1187,7 @@ body {
     }
 
     .content__overlay.m-overlay-start:before,
-    .content__overlay.m-overlay-week-slimming:before,
+    .content__overlay.m-overlay-week-weightloss:before,
     .content__overlay.m-overlay-week-restaurant:before {
         background: #fff;
     }
@@ -1207,7 +1207,7 @@ body {
 }
 
 .media-max-width_1000 .content__overlay.m-overlay-start:before,
-.media-max-width_1000 .content__overlay.m-overlay-week-slimming:before,
+.media-max-width_1000 .content__overlay.m-overlay-week-weightloss:before,
 .media-max-width_1000 .content__overlay.m-overlay-week-restaurant:before {
     background: #fff;
 }
@@ -1227,7 +1227,7 @@ body {
     padding-left: 6px;
 }
 
-.content__order-slimming,
+.content__order-weightloss,
 .content__order-restaurant {
     display: inline-block;
     white-space: nowrap;
@@ -1244,7 +1244,7 @@ body {
     background: #FFD641;
 }
 
-.content__order-slimming {
+.content__order-weightloss {
     background: #B1E7F8;
 }
 
@@ -1416,5 +1416,5 @@ body {
 /* / favourites */
 
 
-/* TODO: slimming.jpg */
+/* TODO: weightloss.jpg */
 /* TODO: garnish list in menu */

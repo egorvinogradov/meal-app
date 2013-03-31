@@ -1,27 +1,21 @@
 <template name="order">
-    ---
     {{#each days }}
-        <h1>11</h1>
+        {{#if dishes }}
+            <div class="content__menu-group" data-date="{{ date }}">
+                <h1 class="content__menu-header">{{ day }}<span class="content__order-day-price">/ {{ price }}р.</span></h1>
+                <ul class="content__menu-list">
+                    {{# each dishes }}
+                        {{> menuItem }}
+                    {{/each}}
+                </ul>
+            </div>
+        {{else}}
+            <div class="content__menu-group" data-date="{{ date }}">
+                <h1 class="content__menu-header">{{ day }}</h1>
+                <div class="content__menu-list">
+                    <span class="{{ className }}">{{ message }}</span>
+                </div>
+            </div>
+        {{/if }}
     {{/each}}
-
-</template>
-
-<template name="order-group-dishes">    
-    <div class="content__menu-group" data-date="<%= date %>">
-        <h1 class="content__menu-header">{{ day }}<span class="content__order-day-price">/ {{ price }}р.</span></h1>
-        <ul class="content__menu-list">
-            {{ dishes }}
-        </ul>
-    </div>
-
-
-</template>
-
-<template name="order-group-message">
-    <div class="content__menu-group" data-date="<%= date %>">
-        <h1 class="content__menu-header">{{ day }}</h1>
-        <div class="content__menu-list">
-            <span class="<%= className %>">{{ message }}</span>
-        </div>
-    </div>
 </template>
