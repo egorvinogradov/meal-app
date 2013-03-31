@@ -491,7 +491,7 @@ var Menu = View.extend({
         return this.assembledMenu;
 
     },
-    onMenuItemClick: function(e){
+    onItemClick: function(e){
 
         var item = $(e.currentTarget);
         var date = this.container.data('date');
@@ -517,13 +517,21 @@ var Menu = View.extend({
 
         console.log(( count ? 'Selected' : 'Unselected') + ' dish', id);
     },
+    onPlusClick: function(e){
+        
+    },
+    onMinusClick: function(e){
+
+    },
     render: function(menu, date, provider){
 
         var assembledMenu = this.assembleMenu(menu);
         var fragment = Meteor.render($.proxy(function(){
 
             Template.menu.events({
-                'click .content__menu-item': $.proxy(this.onMenuItemClick, this)
+                'click .content__menu-item': $.proxy(this.onItemClick, this),
+                'click .content__menu-plus': $.proxy(this.onPlusClick, this),
+                'click .content__menu-minus': $.proxy(this.onMinusClick, this)
             });
 
             return Template.menu({
