@@ -1,12 +1,19 @@
 --- Базовая view и наследование
+
 Order
+    --- view
+    кнопка "Исправить"
+
 Overlay
     start
     attention
+
 Роутер
+
 Menu
     Выбор на всю неделю
     Помечать заказанные блюда
+    Events
 
 
 /* Later */

@@ -95,14 +95,12 @@ var App = View.extend({
         this.config = this.options.config;
 
         var order = this.getOrder();
-        var rawMenu = this.getMenu();
-        var assembledMenu = this.assembleMenu(rawMenu);
+        var menu = this.getMenu();
 
         this.header = new Header({
             app: this,
             container: '.header',
-            assembledMenu: assembledMenu,
-            rawMenu: rawMenu,
+            menu: menu,
             order: order
         });
 
@@ -110,6 +108,7 @@ var App = View.extend({
             this.order = new Order({
                 container: '.content__wrapper',
                 order: order,
+                menu: menu,
                 app: this
             });
         }
@@ -117,8 +116,8 @@ var App = View.extend({
             this.menu = new Menu({
                 app: this,
                 container: '.content__wrapper',
-                assembledMenu: assembledMenu,
-                rawMenu: rawMenu
+                menu: menu,
+                order: order
             });
         }
 
@@ -171,35 +170,51 @@ var App = View.extend({
             }
         }
     },
-    assembleMenu: function(menu){
-
-        var assembledMenu = {};
-
-        _.each(menu, function(day){
-
-            var providers = {};
-
-            _.each(day.items, function(item){
-                var provider = providers[item.provider];
-                if ( !provider ) {
-                    providers[item.provider] = {};
-                }
-                var category = providers[item.provider][item.category];
-                if ( !category ) {
-                    providers[item.provider][item.category] = [];
-                }
-                providers[item.provider][item.category].push(item);
-            }, this);
-
-            assembledMenu[day.date] = providers;
-
-        }, this);
-
-        return assembledMenu;
-
-    },
     removeOverlays: function(){
         $(this.selectors.overlay).remove();
+    },
+    addToOrder: function(order, date, data){
+
+        function unionDishLists(origin, updated){
+            var ids = _.union(
+                _.pluck(origin, 'id'),
+                _.pluck(updated, 'id')
+            );
+            return _.chain(ids).map(function(id){
+                var dishIndex = _.indexOf( _.pluck(updated, 'id'), id );
+                return dishIndex > -1
+                    ? updated[dishIndex].count === 0 ? null : updated[dishIndex]
+                    : origin[ _.indexOf( _.pluck(origin, 'id'), id ) ];
+            }).compact().value();
+        };
+
+        var dayOrder = this.getOrderByDate(order, date);
+
+        if ( !dayOrder ) {
+            order.order.push({
+                dishes: [],
+                date: date,
+                restaurant: false
+            });
+            dayOrder = order.order[order.order.length - 1];
+        }
+
+        if ( data === 'restaurant' ) {
+            dayOrder.restaurant = true;
+            dayOrder.dishes = [];
+        }
+        else if (data === 'none' ) {
+            dayOrder.restaurant = false;
+            dayOrder.dishes = [];
+        }
+        else if ( data.id && typeof data.count !== 'undefined' ) {
+            dayOrder.restaurant = false;
+            dayOrder.dishes = unionDishLists(dayOrder.dishes, [data]);
+        }
+        else if ( data instanceof Array ) {
+            dayOrder.restaurant = false;
+            dayOrder.dishes = unionDishLists(dayOrder.dishes, data);
+        }
     }
 
 });
@@ -223,12 +238,11 @@ var Header = View.extend({
         this.container = $(this.options.container);
         this.app = this.options.app;
         this.order = this.options.order;
-        this.rawMenu = this.options.rawMenu;
-        this.assembledMenu = this.options.assembledMenu;
+        this.menu = this.options.menu;
 
-        console.log('Header initialize', this.rawMenu);
+        console.log('Header initialize', this.menu);
 
-        this.render(this.rawMenu, this.order);
+        this.render(this.menu, this.order);
         this.bindBodyEvents();
     },
     getCurrentWeekDays: function(menu){
@@ -313,7 +327,7 @@ var Header = View.extend({
             .removeClass(this.classes.active);
 
         this.app.menu.render(
-            this.app.menu.assembledMenu,
+            this.app.menu.menu,
             currentDate,
             currentProvider
         );
@@ -342,8 +356,8 @@ var Header = View.extend({
             var currentDate = currentTarget.parents(this.selectors.headerDay).data('date');
             var currentProvider = this.app.menu.container.data('provider');
 
-            this.updateProviders(this.rawMenu, currentDate, currentProvider);
-            this.app.menu.render(this.assembledMenu, currentDate, currentProvider);
+            this.updateProviders(this.menu, currentDate, currentProvider);
+            this.app.menu.render(this.menu, currentDate, currentProvider);
         }
         else if ( type === 'restaurant' ) {
             var overlay = new Overlay({
@@ -421,27 +435,99 @@ var Header = View.extend({
 
 var Menu = View.extend({
 
+    selectors: {
+        number: '.content__menu-number',
+        count: '.content__menu-count'
+    },
+    classes: {
+        selected: 'm-selected'
+    },
+
     initialize: function(){
 
         this.container = $(this.options.container);
-        this.rawMenu = this.options.rawMenu;
-        this.assembledMenu = this.options.assembledMenu;
+        this.menu = this.options.menu;
+        this.order = this.options.order;
         this.app = this.options.app;
 
-        console.log('Menu initialize', this.assembledMenu);
+        console.log('Menu initialize', this.menu);
 
-        var firstDay = _.keys(this.assembledMenu)[0];
-        var firstProvider = _.keys(this.assembledMenu[firstDay])[0];
+        var assembledMenu = this.assembleMenu(this.menu);
+        var firstDay = _.keys(assembledMenu)[0];
+        var firstProvider = _.keys(assembledMenu[firstDay])[0];
 
-        this.render(this.assembledMenu, firstDay, firstProvider);
-        this.app.header.updateProviders(this.rawMenu, firstDay, firstProvider);
+        this.render(this.menu, firstDay, firstProvider);
+        this.app.header.updateProviders(this.menu, firstDay, firstProvider);
 
+    },
+    assembleMenu: function(menu){
+
+        if ( this.assembledMenu ) {
+            return this.assembledMenu;
+        }
+
+        this.assembledMenu = {};
+
+        _.each(menu, function(day){
+
+            var providers = {};
+
+            _.each(day.items, function(item){
+                var provider = providers[item.provider];
+                if ( !provider ) {
+                    providers[item.provider] = {};
+                }
+                var category = providers[item.provider][item.category];
+                if ( !category ) {
+                    providers[item.provider][item.category] = [];
+                }
+                providers[item.provider][item.category].push(item);
+            }, this);
+
+            this.assembledMenu[day.date] = providers;
+
+        }, this);
+
+        return this.assembledMenu;
+
+    },
+    onMenuItemClick: function(e){
+
+        var item = $(e.currentTarget);
+        var date = this.container.data('date');
+        var id = item.data('id');
+        var count;
+
+        if ( item.hasClass(this.classes.selected) ) {
+            count = 0;
+            item.removeClass(this.classes.selected).find(this.selectors.number).html(count);
+            this.app.addToOrder(this.order, date, {
+                id: id,
+                count: count
+            });
+        }
+        else {
+            count = 1;
+            item.addClass(this.classes.selected).find(this.selectors.number).html(count);
+            this.app.addToOrder(this.order, date, {
+                id: id,
+                count: count
+            });
+        }
+
+        console.log(( count ? 'Selected' : 'Unselected') + ' dish', id);
     },
     render: function(menu, date, provider){
 
+        var assembledMenu = this.assembleMenu(menu);
         var fragment = Meteor.render($.proxy(function(){
+
+            Template.menu.events({
+                'click .content__menu-item': $.proxy(this.onMenuItemClick, this)
+            });
+
             return Template.menu({
-                categories: _.map(menu[date][provider], function(value, key){
+                categories: _.map(assembledMenu[date][provider], function(value, key){
                     return {
                         name: key,
                         items: value
@@ -502,54 +588,64 @@ var Order = View.extend({
 
         this.container = $(this.options.container);
         this.order = this.options.order;
+        this.menu = this.options.menu;
         this.app = this.options.app;
 
         console.log('Order initialize');
-
-        this.render(this.order);
+        this.render(this.order, this.menu);
 
     },
-
-    render: function(data){
+    render: function(order, menu){
 
         var config = this.app.config;
         var fragment = Meteor.render($.proxy(function(){
             return Template.order({
-                days: _.map(data.order, function(dayOrder){
+                days: _.map(order.order, function(dayOrder){
 
                     var day = this.app.getDayByDate(dayOrder.date);
 
                     if ( dayOrder.dishes && dayOrder.dishes.length ) {
                         return {
-                            date: dayOrder.date,
-                            dishes: dayOrder.dishes,
                             day: day,
-                            price: 300
+                            date: dayOrder.date,
+                            price: this.app.getDayOrderPrice(menu, dayOrder),
+                            dishes: _.map(dayOrder.dishes, function(dish){
+                                return _.extend(
+                                    { count: dish.count },
+                                    this.app.getDishById(menu, dish.id)
+                                );
+                            }, this),
                         }
                     }
                     else if ( dayOrder.restaurant ) {
                         return {
-                            date: dayOrder.date,
                             day: day,
-                            message: config.messageBeginnings.restaurant + config.messageEndingsWeekdays[day.toLowerCase()],
-                            className: config.order.classes.restaurant
+                            date: dayOrder.date,
+                            className: config.order.classes.restaurant,
+                            message:
+                                config.messageBeginnings.restaurant +
+                                config.messageEndingsWeekdays[day.toLowerCase()]
                         }
                     }
                     else {
                         return {
-                            date: dayOrder.date,
                             day: day,
-                            message: config.messageBeginnings.weightLoss + config.messageEndingsWeekdays[day.toLowerCase()],
-                            className: config.order.classes.weightLoss
+                            date: dayOrder.date,
+                            className: config.order.classes.weightLoss,
+                            message:
+                                config.messageBeginnings.weightLoss +
+                                config.messageEndingsWeekdays[day.toLowerCase()]
                         }
                     }
 
                 }, this)
             });
         }, this));
+
         console.log('Order render', fragment, this.container);
         this.container.append(fragment);
         $('body').addClass('m-order');
+        $('.content').addClass('content__order');
 
     }
 });
@@ -560,6 +656,11 @@ var Order = View.extend({
 
 
 if ( Meteor.isClient ) {
+
+    Handlebars.registerHelper('mOne', function(count){
+        return count && count > 1 ? '' : 'm-one';
+    });
+
 
     // TODO: remove
     function init(){
@@ -574,3 +675,4 @@ if ( Meteor.isClient ) {
     init();
 
 }
+
