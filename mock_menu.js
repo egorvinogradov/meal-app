@@ -7068,4 +7068,10 @@ var mock_menu = [
             }
         ]
     }
-]
+];
+
+
+if ( Meteor.isClient ) {
+    window.mock_menu = mock_menu;
+}
+

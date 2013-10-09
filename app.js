@@ -518,21 +518,21 @@ var Menu = View.extend({
         console.log(( count ? 'Selected' : 'Unselected') + ' dish', id);
     },
     onPlusClick: function(e){
-        
+        return false;
     },
     onMinusClick: function(e){
-
+        return false;
     },
     render: function(menu, date, provider){
 
         var assembledMenu = this.assembleMenu(menu);
         var fragment = Meteor.render($.proxy(function(){
 
-            Template.menu.events({
-                'click .content__menu-item': $.proxy(this.onItemClick, this),
-                'click .content__menu-plus': $.proxy(this.onPlusClick, this),
-                'click .content__menu-minus': $.proxy(this.onMinusClick, this)
-            });
+//            Template.menu.events({
+//                'click .content__menu-item': $.proxy(this.onItemClick, this),
+//                'click .content__menu-plus': $.proxy(this.onPlusClick, this),
+//                'click .content__menu-minus': $.proxy(this.onMinusClick, this)
+//            });
 
             return Template.menu({
                 categories: _.map(assembledMenu[date][provider], function(value, key){
@@ -545,12 +545,24 @@ var Menu = View.extend({
                     return categories.indexOf(a.name) < categories.indexOf(b.name) ? -1 : 1;
                 }, this))
             });
+
         }, this));
+
         console.log('Menu render', fragment);
         this.container.html(fragment).data({
             date: date,
             provider: provider
         });
+
+        this.bindEvents();
+    },
+    bindEvents: function(){
+
+        // todo: use Template.menu.events
+
+        $('.content__menu-item').on('click', $.proxy(this.onItemClick, this));
+        $('.content__menu-plus').on('click', $.proxy(this.onPlusClick, this));
+        $('.content__menu-minus').on('click', $.proxy(this.onMinusClick, this));
     }
 });
 

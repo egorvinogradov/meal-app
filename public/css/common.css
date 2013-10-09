@@ -240,6 +240,17 @@ body {
     margin-top: 12px;
 }
 
+.header__favourites-icon {
+    display: block;
+    float: left;
+    position: relative;
+    left: -8px;
+    height: 22px;
+    width: 23px;
+    margin-left: -23px;
+    background: url('../img/hearts.png') no-repeat 0 0;
+}
+
 .header__nav-item {
     float: left;
     margin-left: 20px;
@@ -276,7 +287,7 @@ body {
 }
 
 .header__week {
-    padding-top: 10px;
+    padding-top: 14px;
     margin-right: 195px;
 }
 
@@ -641,10 +652,10 @@ body {
 
 @media all and (max-width: 1500px) {
 
-    .header__week {
-        width: 747px;
-        text-align: right;
-    }
+    /*.header__week {*/
+        /*width: 747px;*/
+        /*text-align: right;*/
+    /*}*/
 }
 
 .media-max-width_1000 .header {

@@ -120,3 +120,8 @@ var mock_order = {
         }
     ]
 };
+
+
+if ( Meteor.isClient ) {
+    window.mock_order = mock_order;
+}
