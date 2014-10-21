@@ -940,18 +940,18 @@ body {
     background: #FFD641;
 }
 
-.content__overlay.m-overlay-week-weightloss {
-    background: #fff url('/img/weightloss.jpg') no-repeat 50% 50%;
+.content__overlay.m-overlay-week-none {
+    background: #fff url('/img/none.jpg') no-repeat 50% 50%;
     -webkit-background-size: contain;
        -moz-background-size: contain;
          -o-background-size: contain;
             background-size: contain;
 }
 
-.content__overlay.m-overlay-day-weightloss .content__overlay-header,
-.content__overlay.m-overlay-week-weightloss .content__overlay-header,
-.content__overlay.m-overlay-day-weightloss .content__overlay-header-wrapper,
-.content__overlay.m-overlay-week-weightloss .content__overlay-header-wrapper {
+.content__overlay.m-overlay-day-none .content__overlay-header,
+.content__overlay.m-overlay-week-none .content__overlay-header,
+.content__overlay.m-overlay-day-none .content__overlay-header-wrapper,
+.content__overlay.m-overlay-week-none .content__overlay-header-wrapper {
     background: #B1E7F8;
 }
 
@@ -1028,7 +1028,7 @@ body {
     }
 
     .content__overlay.m-overlay-start:before,
-    .content__overlay.m-overlay-week-weightloss:before,
+    .content__overlay.m-overlay-week-none:before,
     .content__overlay.m-overlay-week-restaurant:before {
         background: #fff;
     }
@@ -1048,7 +1048,7 @@ body {
 }
 
 .media-max-width_1000 .content__overlay.m-overlay-start:before,
-.media-max-width_1000 .content__overlay.m-overlay-week-weightloss:before,
+.media-max-width_1000 .content__overlay.m-overlay-week-none:before,
 .media-max-width_1000 .content__overlay.m-overlay-week-restaurant:before {
     background: #fff;
 }
@@ -1072,7 +1072,7 @@ body {
     padding-left: 6px;
 }
 
-.content__order-weightloss,
+.content__order-none,
 .content__order-restaurant {
     display: inline-block;
     white-space: nowrap;
@@ -1089,7 +1089,7 @@ body {
     background: #FFD641;
 }
 
-.content__order-weightloss {
+.content__order-none {
     background: #B1E7F8;
 }
 
@@ -1122,5 +1122,5 @@ body {
 /* / order */
 
 
-/* TODO: weightloss.jpg */
+/* TODO: none.jpg */
 /* TODO: garnish list in menu */

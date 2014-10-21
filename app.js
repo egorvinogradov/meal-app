@@ -50,12 +50,12 @@ var Config = {
     },
     messageBeginnings: {
         restaurant: 'Ресторан ',
-        weightLoss: 'Худею '
+        none: 'Худею '
     },
     order: {
         classes: {
             restaurant: 'content__order-restaurant',
-            weightLoss: 'content__order-weightloss'
+            none: 'content__order-none'
         }
     },
     overlay: {
@@ -64,9 +64,9 @@ var Config = {
                 day: 'm-overlay-day-restaurant',
                 week: 'm-overlay-week-restaurant'
             },
-            weightLoss: {
-                day: 'm-overlay-day-weightloss',
-                week: 'm-overlay-week-weightloss'
+            none: {
+                day: 'm-overlay-day-none',
+                week: 'm-overlay-week-none'
             }
         },
         links: {
@@ -74,7 +74,7 @@ var Config = {
                 text: 'Где это клёвое место?',
                 href: 'http://maps.google.com' // TODO: указать точное место
             },
-            weightLoss: {
+            none: {
                 text: 'Худейте правильно',
                 href: 'http://ru.wikipedia.org' // TODO: какая-нибудь статья о диете
             }
@@ -88,6 +88,8 @@ var App = View.extend({
     selectors: {
         overlay: '.content__overlay'
     },
+
+    storedOrder: {},
 
     initialize: function(){
 
@@ -124,12 +126,38 @@ var App = View.extend({
     },
     getMenu: function(){
 
-        return mock_menu; // TODO: replace
+        var menu;
+
+        try {
+            menu = JSON.parse(localStorage.getItem('meal_menu'));
+
+            if ( !menu || !menu.length ) {
+                menu = generateMenu(); // TODO: remove
+                localStorage.setItem('meal_menu', JSON.stringify(menu));
+            }
+        }
+        catch (e){}
+
+        return menu;
 
     },
     getOrder: function(){
 
-        return mock_order; // TODO: replace
+        var order;
+
+        try {
+            order = JSON.parse(localStorage.getItem('meal_order'));
+        }
+        catch (e) {}
+
+        if ( !order ) {
+            order = {
+                order_was_made: false,
+                order: []
+            };
+        }
+
+        return order;
 
     },
     getDayByDate: function(dateStr){
@@ -186,7 +214,7 @@ var App = View.extend({
                     ? updated[dishIndex].count === 0 ? null : updated[dishIndex]
                     : origin[ _.indexOf( _.pluck(origin, 'id'), id ) ];
             }).compact().value();
-        };
+        }
 
         var dayOrder = this.getOrderByDate(order, date);
 
@@ -215,6 +243,9 @@ var App = View.extend({
             dayOrder.restaurant = false;
             dayOrder.dishes = unionDishLists(dayOrder.dishes, data);
         }
+
+        localStorage.setItem('meal_order', JSON.stringify(order));
+
     }
 
 });
@@ -249,23 +280,24 @@ var Header = View.extend({
 
         function getPreviousDay(day){
             return new Date( +day - 24 * 60 * 60 * 1000 );
-        };
+        }
+
         function getNextDay(day){
             return new Date( +day + 24 * 60 * 60 * 1000 );
-        };
+        }
 
-        function getNearestMonday(day){
+        function getTheNearestMonday(day){
             if ( day.getDay() === 1 ) {
                 return day;
             }
             else {
-                var dayDefore = getPreviousDay(firstDay);
-                getNearestMonday(dayDefore);
+                var dayBefore = getPreviousDay(day);
+                return getTheNearestMonday(dayBefore);
             }
         }
 
         var firstDay = new Date(menu[0].date);
-        var monday = getNearestMonday(firstDay);
+        var monday = getTheNearestMonday(firstDay);
         var weekdays = [];
         var currentDay = monday;
 
@@ -351,29 +383,33 @@ var Header = View.extend({
             .siblings()
             .removeClass(this.classes.active);
 
+        var currentDate = currentTarget
+            .parents(this.selectors.headerDay)
+            .data('date');
+
         if ( type === 'office' ) {
 
-            var currentDate = currentTarget.parents(this.selectors.headerDay).data('date');
             var currentProvider = this.app.menu.container.data('provider');
-
             this.updateProviders(this.menu, currentDate, currentProvider);
             this.app.menu.render(this.menu, currentDate, currentProvider);
         }
         else if ( type === 'restaurant' ) {
-            var overlay = new Overlay({
+            new Overlay({
                 container: '.content',
                 type: 'restaurant',
                 weekday: weekday,
                 app: this.app
             });
+            this.app.addToOrder(this.app.menu.order, currentDate, 'restaurant');
         }
-        else if ( type === 'weightLoss' ) {
-            var overlay = new Overlay({
+        else if ( type === 'none' ) {
+            new Overlay({
                 container: '.content',
-                type: 'weightLoss',
+                type: 'none',
                 weekday: weekday,
                 app: this.app
             });
+            this.app.addToOrder(this.app.menu.order, currentDate, 'none');
         }
 
         e.stopPropagation();
@@ -634,7 +670,7 @@ var Order = View.extend({
                                     { count: dish.count },
                                     this.app.getDishById(menu, dish.id)
                                 );
-                            }, this),
+                            }, this)
                         }
                     }
                     else if ( dayOrder.restaurant ) {
@@ -651,9 +687,9 @@ var Order = View.extend({
                         return {
                             day: day,
                             date: dayOrder.date,
-                            className: config.order.classes.weightLoss,
+                            className: config.order.classes.none,
                             message:
-                                config.messageBeginnings.weightLoss +
+                                config.messageBeginnings.none +
                                 config.messageEndingsWeekdays[day.toLowerCase()]
                         }
                     }
@@ -671,28 +707,20 @@ var Order = View.extend({
 });
 
 
-
-
-
-
 if ( Meteor.isClient ) {
 
     Handlebars.registerHelper('mOne', function(count){
         return count && count > 1 ? '' : 'm-one';
     });
 
-
-    // TODO: remove
     function init(){
-        if ( typeof mock_menu === 'undefined' || typeof mock_order === 'undefined' ) {
+        if ( typeof generateMenu === 'undefined' ) {
             setTimeout(init, 100);
         }
         else {
             window.app = new App({ config: Config });
+            console.log('Initialized app', window.app);
         }
-    };
-
+    }
     init();
-
 }
-
